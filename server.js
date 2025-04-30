@@ -15,12 +15,14 @@ connectDb();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// middleware
+// middlewares
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// route 
+// routes 
+app.use('/api/v1/auth', require('./routes/authRoutes'));
+
 app.get('/', (req, res) => {
     return res.status(200).send("<h1>Welcome to the Restaurant Server</h1>");
 });

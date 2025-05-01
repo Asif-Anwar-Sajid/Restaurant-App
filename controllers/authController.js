@@ -1,4 +1,6 @@
 const userModel = require("../models/userModel");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // register controller
 const registerController = async (req, res) => {
@@ -19,8 +21,12 @@ const registerController = async (req, res) => {
                 message: "Email is already registered. Please login",
             });
         }
+        // hashing password
+        var salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         // create new user
-        const newUser = await userModel.create({userName, email, password, phone, address});
+        const newUser = await userModel.create({userName, email, password: hashedPassword, phone, address});
         res.status(201).send({
             success: true,
             message: "User registered successfully",
@@ -56,15 +62,21 @@ const loginController = async (req, res) => {
         }
         console.log(password, user.password);
         // check if password is correct
-        if(user.password !== password) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        
+        if(!isMatch) {
             return res.status(500).send({
                 success: false,
                 message: "Invalid password",
             });
         }
+        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: "7d"});
+        user.password = undefined;
+
         res.status(200).send({
             success: true,
             message: "User logged in successfully",
+            token,
             user
         })
     } catch(error) {

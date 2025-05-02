@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
     profile: {
         type: String,
         defualt: "https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png"
+    },
+    answer: {
+       type: String,
+       required: [true, 'Answer is required'] 
     }
 }, {timestamps:true})
 

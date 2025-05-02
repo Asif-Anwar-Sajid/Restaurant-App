@@ -1,4 +1,5 @@
 const userModel = require("../models/userModel");
+const bcrypt = require("bcrypt");
 
 const getUserController = async (req, res) => {
     try {
@@ -54,6 +55,7 @@ const updateUserController = async (req, res) => {
         }
         // save user
         await user.save();
+        user._id = undefined;
         res.status(200).send({
             success: true,
             message: "User Updated Successfully",
@@ -68,7 +70,57 @@ const updateUserController = async (req, res) => {
     }
 };
 
+const resetPasswordController = async (req, res) => {
+    try {
+        const {email, newPassword, answer} = req.body;
+        if(!email || !newPassword || !answer) {
+            return res.status(500).send({
+                success: false,
+                message: "Please provide all fields"
+            });
+        }
+        // find user
+        const user = await userModel.findById({_id: req.body.id});
+        
+        if(!user) {
+            return res.status(404).send({
+                success: false,
+                message: "User Not Found"
+            });
+        }
+        console.log(user, answer, user.password);
+        
+        // check if answer is correct
+        if(user.answer !== answer) {
+            return res.status(500).send({
+                success: false,
+                message: "Incorrect Answer"
+            });
+        } 
+        // hash the new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        // update password
+        console.log(user.password, hashedPassword);
+        
+        user.password = hashedPassword;
+        await user.save();
+        res.status(200).send({
+            success: true,
+            message: "Password Reset Successfully",
+            user
+        });
+    } catch(error) {
+        res.status(500).send({
+            success: false,
+            message: "Error in Reset Password API",
+            error
+        });
+    }
+};
+
 module.exports = {
     getUserController,
-    updateUserController
+    updateUserController,
+    resetPasswordController
 };

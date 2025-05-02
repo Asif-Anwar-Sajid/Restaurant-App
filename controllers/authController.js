@@ -5,9 +5,9 @@ const jwt = require("jsonwebtoken");
 // register controller
 const registerController = async (req, res) => {
     try {
-        const {userName, email, password, phone, address} = req.body;
+        const {userName, email, password, phone, address, answer} = req.body;
         // validation
-        if(!userName || !email || !password || !phone || !address) {
+        if(!userName || !email || !password || !phone || !address || !answer) {
             return res.status(500).send({
                 success: false,
                 message: "All fields are required",
@@ -26,7 +26,7 @@ const registerController = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // create new user
-        const newUser = await userModel.create({userName, email, password: hashedPassword, phone, address});
+        const newUser = await userModel.create({userName, email, password: hashedPassword, phone, address, answer});
         res.status(201).send({
             success: true,
             message: "User registered successfully",

@@ -119,8 +119,58 @@ const resetPasswordController = async (req, res) => {
     }
 };
 
+const updatePasswordController = async (req, res) => {
+    try {
+        const {oldPassword, newPassword} = req.body;
+        if(!oldPassword || !newPassword) {
+            return res.status(500).send({
+                success: false,
+                message: "Please provide the old and new password"
+            });
+        }
+        // find user
+        const user = await userModel.findById({_id: req.body.id}).select("+password");
+        console.log(user.password);
+        
+        if(!user) {
+            return res.status(404).send({
+                success: false,
+                message: "User Not Found"
+            });
+        }
+        // check if old password is correct
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if(!isMatch) {
+            return res.status(500).send({
+                success: false,
+                message: "Incorrect Old Password"
+            });
+        }
+        
+        // hash the new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // save the new password
+        user.password = hashedPassword;
+        
+        await user.save();
+        res.status(200).send({
+            success: true,
+            message: "Password Updated Successfully"
+        });
+    } catch(error) {
+        res.status(500).send({
+            success: false,
+            message: "Error in Update Password API",
+            error
+        })
+    }
+}
+
 module.exports = {
     getUserController,
     updateUserController,
-    resetPasswordController
+    resetPasswordController,
+    updatePasswordController
 };

@@ -164,13 +164,30 @@ const updatePasswordController = async (req, res) => {
             success: false,
             message: "Error in Update Password API",
             error
-        })
+        });
     }
-}
+};
+
+const deleteUserController = async (req, res) => {
+    try {
+        await userModel.findByIdAndDelete({_id: req.params.id});
+        res.status(200).send({
+            success: true,
+            message: "User Deleted Successfully"
+        });
+    } catch(error) {
+        res.status(500).send({
+            success: false,
+            message: "Error in Delete User API",
+            error
+        });
+    }
+};
 
 module.exports = {
     getUserController,
     updateUserController,
     resetPasswordController,
-    updatePasswordController
+    updatePasswordController,
+    deleteUserController
 };

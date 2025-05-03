@@ -23,6 +23,7 @@ app.use(morgan('dev'));
 // routes 
 app.use('/api/v1/auth', require('./routes/authRoutes'));
 app.use('/api/v1/user', require('./routes/userRoutes'));
+app.use('/api/v1/restaurant', require('./routes/restaurantRoutes'));
 
 app.get('/', (req, res) => {
     return res.status(200).send("<h1>Welcome to the Restaurant Server</h1>");
